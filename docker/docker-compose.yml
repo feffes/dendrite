@@ -1,17 +1,10 @@
 version: "3.4"
 services:
   monolith:
-    container_name: dendrite_monolith
-    hostname: monolith
-    entrypoint: ["bash", "./docker/services/monolith.sh"]
-    build: ./
-    volumes:
-      - ..:/build
-      - ./build/bin:/build/bin
-    networks:
-      - internal
-    depends_on:
-      - postgres
+    build:
+      context: ..
+      target: monolith
+      dockerfile: ./docker/Dockerfile
     ports:
       - "8008:8008"
       - "8448:8448"
