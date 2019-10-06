@@ -25,6 +25,17 @@ COPY --from=build /build/bin/dendrite-monolith-server /bin/monolith
 COPY --from=build /build/docker/dendrite-docker.yml ./dendrite.yaml
 ENTRYPOINT ["/bin/monolith"]
 
+#################
+## Room Server ##
+#################
+FROM scratch AS room-server
+EXPOSE 7770
+ENV DENDRITE_CONFIG_FILE="dendrite.yaml"
+WORKDIR /dendrite
+COPY --from=build /build/bin/dendrite-room-server /bin/room-server
+COPY --from=build /build/docker/dendrite-docker.yml ./dendrite.yaml
+ENTRYPOINT ["/bin/room-server"]
+
 ################
 ## Client API ##
 ################
@@ -83,7 +94,7 @@ ENTRYPOINT ["/bin/public-rooms-api"]
 #######################
 ## Federation Sender ##
 #######################
-FROM scratch AS public-sender
+FROM scratch AS federation-sender
 EXPOSE 7776
 ENV DENDRITE_CONFIG_FILE="dendrite.yaml"
 WORKDIR /dendrite
@@ -113,6 +124,8 @@ COPY --from=build /build/bin/dendrite-typing-server /bin/typing-server
 COPY --from=build /build/docker/dendrite-docker.yml ./dendrite.yaml
 ENTRYPOINT ["/bin/typing-server"]
 
+
+
 ############################################
 #------------------------------------------#
 #                  PROXIES                 #
@@ -138,6 +151,7 @@ EXPOSE 8008
 ENV FEDERATION_API_SERVER_URL="http://federation-api:7772" MEDIA_API_SERVER_URL="http://media-api:7774"
 COPY --from=build /build/bin/federation-api-proxy /bin/federation-api-proxy
 ENTRYPOINT ["/bin/federation-api-proxy", "--bind-address=`:8008`"]
+
 
 ############################################
 #------------------------------------------#

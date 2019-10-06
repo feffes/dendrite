@@ -1,18 +1,39 @@
 #!/bin/bash
 
-./build.sh
+#Builds a target with a specified tag
+a_flag=''
+tags=''
+targets=''
+all_targets=''
+print_usage() {
+  printf "Usage: ./build.sh [options]
+  A script to build docker images using buildkit.
 
-# Generate the keys if they don't already exist.
-if [ ! -f server.key ] || [ ! -f server.crt ] || [ ! -f matrix_key.pem ]; then
-    echo "Generating keys ..."
+  Options:
 
-    rm -f server.key server.crt matrix_key.pem
+    -a               Build all targets.
+    -t string        Tag to use on all built images
+    -e string        Target.
 
-    test -f server.key || openssl req -x509 -newkey rsa:4096 \
-                        -keyout server.key \
-                        -out server.crt \
-                        -days 3650 -nodes \
-                        -subj /CN=localhost
+  Example Usage:
+    ./build.sh -a -t latest -t 1.0
+"
+}
 
-    test -f matrix_key.pem || /build/bin/generate-keys -private-key matrix_key.pem
-fi
+build_image() {
+  DOCKER_BUILDKIT=1 docker build --target $1 .
+}
+
+while getopts 'at:e:' flag; do
+  case "${flag}" in
+    a) a_flag='true' ;;
+    t) tags="${OPTARG}" ;;
+    e) targets="${OPTARG}" ;;
+    *) print_usage
+       exit 1 ;;
+  esac
+done
+if [ $a_flag == 'true' ]; then
+  echo "truelol"
+else
+  while
